@@ -11,8 +11,8 @@
 %
 
 \NeedsTeXFormat{LaTeX2e}[2017/04/15]
-\newcommand\ustcthesisversion{v3.3.0}
-\ProvidesClass{ustcthesis}[2020/04/03 {\ustcthesisversion} USTC thesis template]
+\newcommand\ustcthesisversion{v3.3.1}
+\ProvidesClass{ustcthesis}[2021/12/10 {\ustcthesisversion} USTC thesis template]
 
 % 报错和警告
 \newcommand\ustc@error[1]{%
@@ -1785,7 +1785,13 @@
     \else
       \vskip 0.8cm%
       {\lishu\fontsize{26bp}{26bp}\selectfont
-        （\ustc@professional@type）\par}%
+        （%
+        \ifx\ustc@professional@type\@empty
+          专业学位类型%
+        \else
+          \ustc@professional@type
+        \fi
+        ）\par}%
       \vskip 1.0cm%
     \fi
     \ifustc@badge@color@blue
@@ -1831,7 +1837,13 @@
       \ustc@thesis@name@en\par}%
     \ifustc@degree@type@academic\else
       {\fontsize{16bp}{32bp}\selectfont
-        (\ustc@professional@type@en)\par}%
+        (%
+        \ifx\ustc@professional@type@en\@empty
+          Professional degree type%
+        \else
+          \ustc@professional@type@en
+        \fi
+        )\par}%
     \fi
     \vskip 2.5cm%
     \ifustc@badge@color@blue
@@ -2506,7 +2518,7 @@
 \setcounter{totalnumber}{20}
 \setcounter{dbltopnumber}{9}
 
-% 修改默认的浮动体描述符为 |htb|。
+% 修改默认的浮动体描述符为 |h|。
 \def\fps@figure{h}
 \def\fps@table{h}
 
@@ -2521,7 +2533,30 @@
 % 表注左缩进两字，续行悬挂缩进左对齐，两端对齐。
 \setlength{\floatsep}{6bp}
 \setlength{\textfloatsep}{6bp}
-\setlength{\intextsep}{12bp}
+\setlength{\intextsep}{6bp}
+
+\DeclareCaptionFont{ustc}{%
+  \ifustc@language@chinese
+    \fontsize{10.5bp}{13.65bp}\selectfont
+  \else
+    \fontsize{10.5bp}{12.075bp}\selectfont
+  \fi
+}
+
+\captionsetup{
+  font           = ustc,
+  labelsep       = quad,
+  skip           = 6bp,
+  figureposition = bottom,
+  tableposition  = top,
+}
+\ifustc@degree@graduate
+  \captionsetup{font+=bf}
+  \captionsetup[table]{font+=sf}
+\fi
+\captionsetup[figure]{
+  belowskip = 6bp,
+}
 
 % 由于 LaTeX2e kernel 的问题，图表等浮动体与文字前后的距离不一致，需要进行 patch。
 % 参考 \href{https://github.com/tuna/thuthesis/issues/614}{tuna/thuthesis/issues\#614}、
@@ -2554,26 +2589,6 @@
   {}{\ustc@patch@error{\@addtocurcol}}
 \patchcmd{\@getpen}{\@M}{\@Mi}
   {}{\ustc@patch@error{\@getpen}}
-
-\DeclareCaptionFont{ustc}{%
-  \ifustc@language@chinese
-    \fontsize{10.5bp}{13.65bp}\selectfont
-  \else
-    \fontsize{10.5bp}{12.075bp}\selectfont
-  \fi
-}
-
-\captionsetup{
-  font           = ustc,
-  labelsep       = quad,
-  skip           = 6bp,
-  figureposition = bottom,
-  tableposition  = top,
-}
-\ifustc@degree@graduate
-  \captionsetup{font+=bf}
-  \captionsetup[table]{font+=sf}
-\fi
 
 % 新定义了 \cs{note} 来生成图表的附注。
 % 如果用 \cs{caption} 生成图表的附注会导致图表的序号有误；
@@ -3198,11 +3213,6 @@
 % \subsubsection{\pkg{siunitx} 宏包}
 
 \AtEndOfPackageFile*{siunitx}{
-  \sisetup{
-    group-minimum-digits = 4,
-    separate-uncertainty = true,
-    inter-unit-product   = \ensuremath{{}\cdot{}},
-  }
   \newcommand\ustc@set@siunitx@language{%
     \ifustc@language@chinese
       \sisetup{
